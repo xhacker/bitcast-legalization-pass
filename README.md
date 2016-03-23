@@ -1,7 +1,7 @@
 # Bitcast Legalization Pass
 
 ```sh
-opt -S -load xcode/BitcastLegalization/Debug/libBitcastLegalization.so < tests/i1.ll
+opt -S -load xcode/BitcastLegalization/Debug/libBitcastLegalization.so -bitcastlegalization < tests/i1.ll
 ```
 
 ## Build and Run Using `cmake`, `make`, and `opt`
