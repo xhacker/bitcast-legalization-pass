@@ -12,6 +12,26 @@ namespace {
     BitcastLegalization() : FunctionPass(ID) {}
 
     bool runOnFunction(Function &function) override {
+      errs() << function.getName() << "\n";
+
+      for (auto &block : function) {
+        for (auto &inst : block) {
+          auto bitCastInst = dyn_cast<BitCastInst>(&inst);
+          if (bitCastInst) {
+            errs() << "  found bitcast instruction\n";
+
+            auto sourceVectorType = dyn_cast<VectorType>(bitCastInst->getOperand(0)->getType());
+            if (sourceVectorType) {
+              auto elemSize = sourceVectorType->getScalarSizeInBits();
+              auto numElems = sourceVectorType->getNumElements();
+              errs() << "    on vectors <" << numElems << " x i" << elemSize
+                << ">\n";
+
+
+            }
+          }
+        }
+      }
       return false;
     }
   };

@@ -1,1 +1,3 @@
 xcode
+*.swp
+build
