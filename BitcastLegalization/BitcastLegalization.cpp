@@ -17,19 +17,25 @@ namespace {
       for (auto &block : function) {
         for (auto &inst : block) {
           auto bitCastInst = dyn_cast<BitCastInst>(&inst);
-          if (bitCastInst) {
-            errs() << "  found bitcast instruction\n";
-
-            auto sourceVectorType = dyn_cast<VectorType>(bitCastInst->getOperand(0)->getType());
-            if (sourceVectorType) {
-              auto elemSize = sourceVectorType->getScalarSizeInBits();
-              auto numElems = sourceVectorType->getNumElements();
-              errs() << "    on vectors <" << numElems << " x i" << elemSize
-                << ">\n";
-
-
-            }
+          if (!bitCastInst) {
+            continue;
           }
+          errs() << "  found bitcast instruction\n";
+
+          auto sourceVectorType = dyn_cast<VectorType>(bitCastInst->getOperand(0)->getType());
+          if (!sourceVectorType) {
+            continue;
+          }
+          auto elemSize = sourceVectorType->getScalarSizeInBits();
+          auto numElems = sourceVectorType->getNumElements();
+          errs() << "    from vector <" << numElems << " x i" << elemSize
+            << ">\n";
+
+          if (!bitCastInst->getType()->isIntegerTy()) {
+            continue;
+          }
+          auto width = bitCastInst->getType()->getPrimitiveSizeInBits();
+          errs() << "    to integer i" << width << "\n";
         }
       }
       return false;
