@@ -23,6 +23,8 @@ namespace {
 
     bool runOnFunction(Function &function) override {
       errs() << function.getName() << "\n";
+      
+      bool modified = false;
 
       for (auto &block : function) {
         for (auto &inst : block) {
@@ -51,10 +53,13 @@ namespace {
           if (elemSize < 8 || !isPowerOf2(elemSize)) {
             errs() << "    i" << elemSize
                    << " is an invalid vector element type\n";
+            
+            legalize(bitCastInst);
+            modified = true;
           }
         }
       }
-      return false;
+      return modified;
     }
   };
 }
