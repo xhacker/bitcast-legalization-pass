@@ -11,6 +11,14 @@ namespace {
     static char ID;
     BitcastLegalization() : FunctionPass(ID) {}
 
+    bool isPowerOf2(unsigned num) {
+      while (num % 2 == 0 && num > 1) {
+        num /= 2;
+      }
+
+      return num == 1;
+    }
+
     bool runOnFunction(Function &function) override {
       errs() << function.getName() << "\n";
 
@@ -22,20 +30,26 @@ namespace {
           }
           errs() << "  found bitcast instruction\n";
 
-          auto sourceVectorType = dyn_cast<VectorType>(bitCastInst->getOperand(0)->getType());
+          auto sourceVectorType =
+              dyn_cast<VectorType>(bitCastInst->getOperand(0)->getType());
           if (!sourceVectorType) {
             continue;
           }
           auto elemSize = sourceVectorType->getScalarSizeInBits();
           auto numElems = sourceVectorType->getNumElements();
           errs() << "    from vector <" << numElems << " x i" << elemSize
-            << ">\n";
+                 << ">\n";
 
           if (!bitCastInst->getType()->isIntegerTy()) {
             continue;
           }
           auto width = bitCastInst->getType()->getPrimitiveSizeInBits();
           errs() << "    to integer i" << width << "\n";
+
+          if (elemSize < 8 || !isPowerOf2(elemSize)) {
+            errs() << "    i" << elemSize
+                   << " is an invalid vector element type\n";
+          }
         }
       }
       return false;
