@@ -10,7 +10,7 @@ namespace {
   struct BitcastLegalization : public FunctionPass {
     static char ID;
     BitcastLegalization() : FunctionPass(ID) {}
-    
+
     void legalize(BitCastInst *);
 
     bool isPowerOf2(unsigned num) {
@@ -23,7 +23,7 @@ namespace {
 
     bool runOnFunction(Function &function) override {
       errs() << function.getName() << "\n";
-      
+
       bool modified = false;
 
       for (auto &block : function) {
@@ -53,7 +53,7 @@ namespace {
           if (elemSize < 8 || !isPowerOf2(elemSize)) {
             errs() << "    i" << elemSize
                    << " is an invalid vector element type\n";
-            
+
             legalize(bitCastInst);
             modified = true;
           }
@@ -77,22 +77,22 @@ void BitcastLegalization::legalize(llvm::BitCastInst *bitCastInst) {
   auto elemSize = sourceVectorType->getScalarSizeInBits();
   auto numElems = sourceVectorType->getNumElements();
   auto totalSize = elemSize * numElems;
-  
+
   assert(numElems > 1 &&
          "BitcastLegalization has nothing to do with v1!");
-  
+
   int legalizedTotalSize = 8;
   while (legalizedTotalSize < totalSize) {
     legalizedTotalSize *= 2;
   }
-  
+
   IRBuilder<> builder(bitCastInst);
-  
+
   Value *lastValue;
   for (int i = 0; i < numElems; ++i) {
     Value *elemValue = builder.CreateExtractElement(sourceVector, i);
     Value *zextElemValue = builder.CreateZExt(elemValue, IntegerType::get(builder.getContext(), legalizedTotalSize));
-    
+
     if (i == 0) {
       lastValue = zextElemValue;
     }
@@ -101,9 +101,6 @@ void BitcastLegalization::legalize(llvm::BitCastInst *bitCastInst) {
       lastValue = builder.CreateOr(lastValue, shiftedValue);
     }
   }
-  
-  for (auto &u : bitCastInst->uses()) {
-    User *user = u.getUser();
-    user->setOperand(u.getOperandNo(), lastValue);
-  }
+
+  bitCastInst->replaceAllUsesWith(lastValue);
 }
