@@ -1,3 +1,7 @@
 xcode
 *.swp
 build
+
+tests/*.bin
+tests/*.s
+tests/*-legalized.ll
