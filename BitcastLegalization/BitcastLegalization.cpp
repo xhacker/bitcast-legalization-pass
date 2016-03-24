@@ -101,6 +101,8 @@ void BitcastLegalization::legalize(llvm::BitCastInst *bitCastInst) {
       lastValue = builder.CreateOr(lastValue, shiftedValue);
     }
   }
+  
+  Value *result = builder.CreateTrunc(lastValue, IntegerType::get(builder.getContext(), totalSize));
 
-  bitCastInst->replaceAllUsesWith(lastValue);
+  bitCastInst->replaceAllUsesWith(result);
 }
