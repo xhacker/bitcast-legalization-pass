@@ -25,3 +25,12 @@ cmake -G "Xcode" ..
 cd ..
 opt -S -load xcode/BitcastLegalization/Debug/libBitcastLegalization.so -bitcastlegalization < tests/i1.ll
 ```
+
+## Run Tests
+
+The following runs a test that shows that the pass avoids the problem mentioned in the page linked above.
+
+```sh
+cd test
+./run.sh pr2
+```
