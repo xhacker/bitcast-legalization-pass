@@ -31,6 +31,6 @@ opt -S -load xcode/BitcastLegalization/Debug/libBitcastLegalization.so -bitcastl
 The following runs a test that shows that the pass avoids the problem mentioned in the page linked above.
 
 ```sh
-cd test
+cd tests
 ./run.sh pr2
 ```
