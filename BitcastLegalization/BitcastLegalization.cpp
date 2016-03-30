@@ -22,7 +22,7 @@ namespace {
     }
 
     bool runOnFunction(Function &function) override {
-      errs() << function.getName() << "\n";
+      errs() << function.getName() << ":\n";
 
       bool modified = false;
 
@@ -50,13 +50,15 @@ namespace {
           auto width = bitCastInst->getType()->getPrimitiveSizeInBits();
           errs() << "    to integer i" << width << "\n";
 
-          if (elemSize < 8 || !isPowerOf2(elemSize)) {
-            errs() << "    i" << elemSize
-                   << " is an invalid vector element type\n";
-
-            legalize(bitCastInst);
-            modified = true;
+          if (elemSize >= 8 && isPowerOf2(elemSize)) {
+            continue;
           }
+          errs() << "    i" << elemSize
+                  << " is an invalid vector element type."
+                  << " performing legalization\n";
+
+          legalize(bitCastInst);
+          modified = true;
         }
       }
       return modified;
@@ -101,7 +103,7 @@ void BitcastLegalization::legalize(llvm::BitCastInst *bitCastInst) {
       lastValue = builder.CreateOr(lastValue, shiftedValue);
     }
   }
-  
+
   Value *result = builder.CreateTrunc(lastValue, IntegerType::get(builder.getContext(), totalSize));
 
   bitCastInst->replaceAllUsesWith(result);
