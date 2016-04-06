@@ -27,6 +27,8 @@ namespace {
       bool modified = false;
 
       for (auto &block : function) {
+        std::vector<BitCastInst *> bitCastInstsToErase;
+
         for (auto &inst : block) {
           auto bitCastInst = dyn_cast<BitCastInst>(&inst);
           if (!bitCastInst) {
@@ -59,8 +61,14 @@ namespace {
 
           legalize(bitCastInst);
           modified = true;
+          bitCastInstsToErase.push_back(bitCastInst);
+        }
+
+        for (auto &instr : bitCastInstsToErase) {
+          instr->eraseFromParent();
         }
       }
+
       return modified;
     }
   };
